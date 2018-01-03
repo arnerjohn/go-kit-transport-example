@@ -2,8 +2,10 @@ package transport
 
 import (
 	"context"
+	"encoding/json"
 	"github.com/arnerjohn/transport-example/service"
 	"github.com/go-kit/kit/endpoint"
+	"net/http"
 )
 
 type UppercaseRequest struct {
@@ -40,4 +42,26 @@ func MakeCountEndpoint(svc service.ServiceInterface) endpoint.Endpoint {
 		v := svc.Count(ctx, req.Input)
 		return CountResponse{Output: v}, nil
 	}
+}
+
+func DecodeUppercaseRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	var request UppercaseRequest
+	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+		return nil, err
+	}
+
+	return request, nil
+}
+
+func DecodeCountRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	var request CountRequest
+	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+		return nil, err
+	}
+
+	return request, nil
+}
+
+func EncodeResponse(_ context.Context, w http.ResponseWriter, response interface{}) (err error) {
+	return json.NewEncoder(w).Encode(response)
 }

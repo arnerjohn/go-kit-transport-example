@@ -1,31 +1,30 @@
 package main
 
 import (
-	"context"
-	"fmt"
 	"github.com/arnerjohn/transport-example/service"
 	"github.com/arnerjohn/transport-example/transport"
+	httptransport "github.com/go-kit/kit/transport/http"
+	"log"
+	"net/http"
 )
 
 func main() {
 	var svc service.ServiceInterface
 	svc = service.Service{}
 
-	uppercaseRequest := transport.UppercaseRequest{Input: "hello"}
-	uppercaseEndpoint := transport.MakeUppercaseEndpoint(svc)
-	uppercaseOutput, err := uppercaseEndpoint(context.Background(), uppercaseRequest)
+	uppercaseHandler := httptransport.NewServer(
+		transport.MakeUppercaseEndpoint(svc),
+		transport.DecodeUppercaseRequest,
+		transport.EncodeResponse,
+	)
 
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println(uppercaseOutput)
+	countHandler := httptransport.NewServer(
+		transport.MakeCountEndpoint(svc),
+		transport.DecodeCountRequest,
+		transport.EncodeResponse,
+	)
 
-	countRequest := transport.CountRequest{Input: "hello"}
-	countEndpoint := transport.MakeCountEndpoint(svc)
-	countOutput, err := countEndpoint(context.Background(), countRequest)
-
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println(countOutput)
+	http.Handle("/uppercase", uppercaseHandler)
+	http.Handle("/count", countHandler)
+	log.Fatal(http.ListenAndServe(":8080", nil))
 }
