@@ -4,21 +4,28 @@ import (
 	"context"
 	"fmt"
 	"github.com/arnerjohn/transport-example/service"
+	"github.com/arnerjohn/transport-example/transport"
 )
 
 func main() {
 	var svc service.ServiceInterface
 	svc = service.Service{}
 
-	upperOut, err := svc.Uppercase(context.Background(), "hello")
+	uppercaseRequest := transport.UppercaseRequest{Input: "hello"}
+	uppercaseEndpoint := transport.MakeUppercaseEndpoint(svc)
+	uppercaseOutput, err := uppercaseEndpoint(context.Background(), uppercaseRequest)
 
 	if err != nil {
 		panic(err)
 	}
+	fmt.Println(uppercaseOutput)
 
-	fmt.Println(upperOut)
+	countRequest := transport.CountRequest{Input: "hello"}
+	countEndpoint := transport.MakeCountEndpoint(svc)
+	countOutput, err := countEndpoint(context.Background(), countRequest)
 
-	countOut := svc.Count(context.Background(), "hello")
-
-	fmt.Println(countOut)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(countOutput)
 }
