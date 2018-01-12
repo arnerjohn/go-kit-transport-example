@@ -8,6 +8,24 @@ import (
 	"net/http"
 )
 
+type EndpointSet struct {
+	UppercaseEndpoint endpoint.Endpoint
+	CountEndpoint     endpoint.Endpoint
+}
+
+func MakeEndpoints(svc service.ServiceInterface) EndpointSet {
+	var uppercaseEndpoint endpoint.Endpoint
+	uppercaseEndpoint = MakeUppercaseEndpoint(svc)
+
+	var countEndpoint endpoint.Endpoint
+	countEndpoint = MakeCountEndpoint(svc)
+
+	return EndpointSet{
+		UppercaseEndpoint: uppercaseEndpoint,
+		CountEndpoint:     countEndpoint,
+	}
+}
+
 type UppercaseRequest struct {
 	Input string `json:"input"`
 }

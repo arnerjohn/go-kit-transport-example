@@ -3,8 +3,8 @@ package main
 import (
 	"github.com/arnerjohn/transport-example/service"
 	"github.com/arnerjohn/transport-example/transport"
-	httptransport "github.com/go-kit/kit/transport/http"
 	"log"
+	"net"
 	"net/http"
 )
 
@@ -12,19 +12,19 @@ func main() {
 	var svc service.ServiceInterface
 	svc = service.Service{}
 
-	uppercaseHandler := httptransport.NewServer(
-		transport.MakeUppercaseEndpoint(svc),
-		transport.DecodeUppercaseRequest,
-		transport.EncodeResponse,
-	)
+	var endpoints transport.EndpointSet
+	endpoints = transport.MakeEndpoints(svc)
 
-	countHandler := httptransport.NewServer(
-		transport.MakeCountEndpoint(svc),
-		transport.DecodeCountRequest,
-		transport.EncodeResponse,
-	)
+	var httpHandlers http.Handler
+	httpHandlers = transport.NewHTTPHandler(endpoints)
 
-	http.Handle("/uppercase", uppercaseHandler)
-	http.Handle("/count", countHandler)
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	httpListener, err := net.Listen("tcp", ":8080")
+
+	defer httpListener.Close()
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	http.Serve(httpListener, httpHandlers)
 }
