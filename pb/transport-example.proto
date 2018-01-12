@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package pb;
+
+service TransportExample {
+	rpc Uppercase(Request) returns (UppercaseResponse) {}
+	rpc Count(Request) returns (CountResponse) {}
+}
+
+message Request {
+	string Input = 1;
+}
+
+message UppercaseResponse {
+	string Output = 1;
+	string Err = 2;
+}
+
+message CountResponse {
+	int64 Output = 1;
+}
